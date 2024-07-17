@@ -13,10 +13,6 @@ def preprocess_image(img_path, target_size=(224, 224)):
     img_array = tf.image.resize(img_array, target_size) / 255.0
     return img_array
 
-def load_class_names(json_path):
-    with open(json_path, 'r') as f:
-        class_names = json.load(f)
-    return class_names
 
 def process_image(img, image_size=224):
     image = np.squeeze(img)
@@ -55,13 +51,11 @@ def main():
         ])
         model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
-    
-    if args.category_names:
-        class_names = load_class_names(args.category_names)
-    else:
-        class_names = {str(i): str(i) for i in range(102)}
+    with open(args.category_names, 'r') as f:
+        class_names = json.load(f)
+        classes = {int(i): class_names[str(i)] for i in classes}
 
-    top_values, top_classes = predict(args.image_path, model, args.top_k, class_names)
+    top_values, top_classes = predict(args.image_path, model, args.top_k, classes)
 
     print("These are the top probabilities:", top_values)
     print("Of these top classes:", top_classes)
